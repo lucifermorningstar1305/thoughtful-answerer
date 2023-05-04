@@ -73,8 +73,9 @@ if __name__ == "__main__":
             x = batch[0].to(device)
 
             with torch.no_grad():
-                embedding = ctx_encoder(x).pooler_output
-                faiss_index.train(embedding.detach().cpu().numpy())
+                embedding = ctx_encoder(x).pooler_output.detach().cpu().numpy()
+                faiss.normalize_L2(embedding)
+                faiss_index.train(embedding)
 
 
     ## Store the embeddings into the Faiss Index
@@ -84,8 +85,9 @@ if __name__ == "__main__":
             x = batch[0].to(device)
 
             with torch.no_grad():
-                embedding = ctx_encoder(x).pooler_output
-                faiss_index.add(embedding.detach().cpu().numpy().astype(np.float32))
+                embedding = ctx_encoder(x).pooler_output.detach().cpu().numpy().astype(np.float32)
+                faiss.normalize_L2(embedding)
+                faiss_index.add(embedding)
 
         assert len(evidences) == faiss_index.ntotal, f"Sorry the Number of evidences : {len(evidences)} != number of totals in faiss index : {faiss_index.ntotal}"
 

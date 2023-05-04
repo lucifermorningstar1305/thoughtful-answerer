@@ -6,6 +6,7 @@ import torch
 import os
 import sys
 import argparse
+import json
 
 from rich import print as rprint
 
@@ -54,13 +55,16 @@ if __name__ == "__main__":
     # Get indices of the nearest
     rprint("[bold #390099]Searching for the top_k evidences ...")
     top_k = args.top_k
+    faiss.normalize_L2(ques_embedding)
     D, I = faiss_index.search(ques_embedding, top_k)
+    D = D.reshape(-1)
     I = I.reshape(-1)
-    rprint(I)
 
     # List Evidences
-    
-    for idx in I:
-        rprint(evidences[idx])
+    results = {}
+    for i, (score, idx) in enumerate(zip(D, I)):
+        results[f"evidence-{i+1}"] = {'score': score, 'evidence':evidences[idx]}
+
+    rprint(results)
 
 
